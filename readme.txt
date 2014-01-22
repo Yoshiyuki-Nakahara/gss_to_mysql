@@ -18,9 +18,9 @@ Example :
     [Sample GoogleSpreadSheet, sorry, japanese only]
     https://docs.google.com/spreadsheet/ccc?key=0AkNwR6_Dui92dG14MG03cklKSEdOYV9hVldFdFBEN1E
 
-	[Command]
+    [Command]
     perl gss_to_mysql.pl \
         --gss-key=0AkNwR6_Dui92dG14MG03cklKSEdOYV9hVldFdFBEN1E \
-        --user=<your google acount> \
-        --password=<your google password>
+        --user=<your google acount username> \
+        --password=<your google account password>
 
