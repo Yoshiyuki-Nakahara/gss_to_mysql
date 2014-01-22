@@ -1,0 +1,26 @@
+
+Usage: perl gss_to_mysql.pl options
+  options: -h|--help    : print usage and exit
+           -v|--verbose : print message verbosely
+
+           --gss-key    : GoogleSpreadSheet key
+           --user       : google account user     with --gss option
+           --password   : google account password with --gss option
+
+           --ddl-only   : output ddl only
+           --dml-only   : output dml only
+
+           --table      : filtering table name (default: all)
+           --drop-table : drop table if exists table_name
+           --dml-transaction : add START TRANSACTION; ... COMMIT;
+
+Example :
+    [Sample GoogleSpreadSheet, sorry, japanese only]
+    https://docs.google.com/spreadsheet/ccc?key=0AkNwR6_Dui92dG14MG03cklKSEdOYV9hVldFdFBEN1E
+
+	[Command]
+    perl gss_to_mysql.pl \
+        --gss-key=0AkNwR6_Dui92dG14MG03cklKSEdOYV9hVldFdFBEN1E \
+        --user=<your google acount> \
+        --password=<your google password>
+
