@@ -460,8 +460,8 @@ usage: perl $basename.pl options
 
            --yaml       : yaml filepath for table definition
            --gss-key    : GoogleSpreadSheet key
-           --user       : google account user     with --gss option
-           --password   : google account password with --gss option
+           --user       : google account user     with --gss-key option
+           --password   : google account password with --gss-key option
 
            --ddl-only   : output ddl only
            --dml-only   : output dml only
