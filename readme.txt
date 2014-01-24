@@ -1,5 +1,12 @@
 
-Usage: perl gss_to_mysql.pl options
+= gss_to_mysql
+
+Generate DDL/DML for MySQL from GoogleSpreadSheet
+
+= Usage
+
+perl gss_to_mysql.pl options
+
   options: -h|--help    : print usage and exit
            -v|--verbose : print message verbosely
 
@@ -14,7 +21,8 @@ Usage: perl gss_to_mysql.pl options
            --drop-table : drop table if exists table_name
            --dml-transaction : add START TRANSACTION; ... COMMIT;
 
-Example :
+= Example
+
     [Sample GoogleSpreadSheet, sorry, japanese only]
     https://docs.google.com/spreadsheet/ccc?key=0AkNwR6_Dui92dG14MG03cklKSEdOYV9hVldFdFBEN1E
 
@@ -23,4 +31,12 @@ Example :
         --gss-key=0AkNwR6_Dui92dG14MG03cklKSEdOYV9hVldFdFBEN1E \
         --user=<your google acount username> \
         --password=<your google account password>
+
+= License
+
+Apache License, Version 2.0
+
+= Copyright
+
+Copyright (c) 2014 Yoshiyuki Nakahara
 

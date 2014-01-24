@@ -1,5 +1,5 @@
 # ------------------------------------------------------------------------- #
-#                      Make DDL/DML from GoogleSpreadSheet                  #
+#                    Generate DDL/DML from GoogleSpreadSheet                #
 # ------------------------------------------------------------------------- #
 
 use strict;
@@ -10,6 +10,16 @@ use Data::Dumper;
 use Config::YAML::Tiny;
 use Net::Google::Spreadsheets;
 use List::MoreUtils qw(first_value first_index);
+
+my $ATTR_SHEET_NAME          = '属性定義';
+my $LAYOUT_SHEET_NAME        = 'レイアウト';
+my $TABLE_NAME_FILED_NAME    = 'テーブル名';
+my $COLUMN_NAME_FILED_NAME   = 'カラム名';
+my $COLUMN_DESC_FILED_NAME   = 'カラム説明';
+my $DATA_TYPE_FIELD_NAME     = 'データ型';
+my $DEFAULT_VALUE_FIELD_NAME = 'デフォルト値';
+my $ENGINE_FIELD_NAME        = 'ENGINE';
+my $CHARSET_FIELD_NAME       = 'CHARSET';
 
 my %program;
 
@@ -74,14 +84,14 @@ sub _gss_to_hash
     }
 
     # find attr header row
-    my $attr_worksheet = $spreadsheet->worksheet( { title => '属性定義' } );
+    my $attr_worksheet = $spreadsheet->worksheet( { title => $ATTR_SHEET_NAME } );
     my @attr_rows      = $attr_worksheet->rows;
     my $attr_first_index = first_index {
         my @attr_row_tmp = values %{$_->content};
-            first_index { $_ =~ /\Eカラム名\Q/     }   @attr_row_tmp >= 0
-        and first_index { $_ =~ /\Eカラム説明\Q/   }   @attr_row_tmp >= 0
-        and first_index { $_ =~ /\Eデータ型\Q/     }   @attr_row_tmp >= 0
-        and first_index { $_ =~ /\Eデフォルト値\Q/ }   @attr_row_tmp >= 0
+            first_index { $_ =~ /$COLUMN_NAME_FILED_NAME/   }   @attr_row_tmp >= 0
+        and first_index { $_ =~ /$COLUMN_DESC_FILED_NAME/   }   @attr_row_tmp >= 0
+        and first_index { $_ =~ /$DATA_TYPE_FIELD_NAME/     }   @attr_row_tmp >= 0
+        and first_index { $_ =~ /$DEFAULT_VALUE_FIELD_NAME/ }   @attr_row_tmp >= 0
     } @attr_rows;
     return undef if $attr_first_index < 0;
     if ( $attr_first_index > 0 ) {
@@ -97,29 +107,29 @@ sub _gss_to_hash
             $attr_row->content->{$header_attr_name} = $attr_row->content->{$attr_key};
             delete $attr_row->content->{$attr_key};
         }
-        next unless defined $attr_row->content->{'カラム名'};
+        next unless defined $attr_row->content->{$COLUMN_NAME_FILED_NAME};
 
-        my $attr_name = $attr_row->content->{'カラム名'};
+        my $attr_name = $attr_row->content->{$COLUMN_NAME_FILED_NAME};
         if ( $attr_name and defined $attr_definition{$attr_name} ) {
             die 'Error : duplicate column_name $attr_name';
         }
 
         $attr_definition{$attr_name} = {
-            'column_name'    => $attr_row->content->{'カラム名'},
-            'data_type'      => $attr_row->content->{'データ型'},
+            'column_name'    => $attr_row->content->{$COLUMN_NAME_FILED_NAME},
+            'data_type'      => $attr_row->content->{$DATA_TYPE_FIELD_NAME},
         };
-        if ( defined $attr_row->content->{'デフォルト値'} ) {
-            $attr_definition{$attr_name}->{'default'} = $attr_row->content->{'デフォルト値'};
+        if ( defined $attr_row->content->{$DEFAULT_VALUE_FIELD_NAME} ) {
+            $attr_definition{$attr_name}->{'default'} = $attr_row->content->{$DEFAULT_VALUE_FIELD_NAME};
         }
     }
 
     # find layout header row
-    my $layout_worksheet = $spreadsheet->worksheet( { title => 'レイアウト' } );
+    my $layout_worksheet = $spreadsheet->worksheet( { title => $LAYOUT_SHEET_NAME } );
     my @layout_rows      = $layout_worksheet->rows;
     my $layout_first_index = first_index {
         my @layout_row_tmp = values %{$_->content};
-            first_index { $_ =~ /\Eテーブル名\Q/ } @layout_row_tmp >= 0
-        and first_index { $_ =~ /\Eカラム名\Q/   } @layout_row_tmp >= 0
+            first_index { $_ =~ /$TABLE_NAME_FILED_NAME/  } @layout_row_tmp >= 0
+        and first_index { $_ =~ /$COLUMN_NAME_FILED_NAME/ } @layout_row_tmp >= 0
     } @layout_rows;
     return undef if $layout_first_index < 0;
     if ( $layout_first_index > 0 ) {
@@ -136,10 +146,10 @@ sub _gss_to_hash
             $layout_row->content->{$header_layout_name} = $layout_row->content->{$layout_key};
             delete $layout_row->content->{$layout_key};
         }
-        next unless defined $layout_row->content->{'カラム名'};
+        next unless defined $layout_row->content->{$COLUMN_NAME_FILED_NAME};
 
         # get table definition
-        my $table_name = $layout_row->content->{'テーブル名'};
+        my $table_name = $layout_row->content->{$TABLE_NAME_FILED_NAME};
         if ( $table_name ) {
             if ( defined $layout_definition{$table_name} ) {
                 die 'Error : duplicate table name definition';
@@ -148,8 +158,8 @@ sub _gss_to_hash
             $layout_definition{$table_name} = {
                 'table_name'    => $table_name,
                 'table_option'  => {
-                    'engine'  => $layout_row->content->{'ENGINE'},
-                    'charset' => $layout_row->content->{'CHARSET'},
+                    'engine'  => $layout_row->content->{$ENGINE_FIELD_NAME},
+                    'charset' => $layout_row->content->{$CHARSET_FIELD_NAME},
                 },
             };
 
@@ -157,7 +167,7 @@ sub _gss_to_hash
         }
 
         # get column definition
-        my $attr_name = $layout_row->content->{'カラム名'};
+        my $attr_name = $layout_row->content->{$COLUMN_NAME_FILED_NAME};
         my %column_definition = %{$attr_definition{$attr_name}};
         if ( defined $layout_row->content->{'NN'} and $layout_row->content->{'NN'} eq 'Y' ) {
             $column_definition{'not_null'} = 'Yes';
@@ -489,9 +499,8 @@ sub parse_program_environment
 
 sub parse_program_config
 {
+    my ( $filename ) = @_;
     verbose( "[ parsing program config file ] ...", 2 );
-
-    my $filename = shift;
 
     my $config = new Config::YAML::Tiny( config => '/dev/null' );
     unless ( $filename ) {
@@ -558,10 +567,8 @@ sub parse_program_option
 
 sub parse_program_argv
 {
+    my ( $config, $option ) = @_;
     verbose( "[ parsing program argv(s) ] ...", 2 );
-
-    my $config = shift;
-    my $option = shift;
 
     my @argv = @ARGV;
     for my $arg ( @argv ) {
