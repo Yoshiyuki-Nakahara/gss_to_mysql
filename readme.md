@@ -5,8 +5,7 @@ Generate DDL/DML for MySQL from GoogleSpreadSheet
 
 ## Usage
 
-perl gss_to_mysql.pl options
-
+    perl gss_to_mysql.pl [options]
     options: -h|--help    : print usage and exit
              -v|--verbose : print message verbosely
 
