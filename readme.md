@@ -7,19 +7,19 @@ Generate DDL/DML for MySQL from GoogleSpreadSheet
 
 perl gss_to_mysql.pl options
 
-  options: -h|--help    : print usage and exit
-           -v|--verbose : print message verbosely
+    options: -h|--help    : print usage and exit
+             -v|--verbose : print message verbosely
 
-           --gss-key    : GoogleSpreadSheet key
-           --user       : google account user     with --gss-key option
-           --password   : google account password with --gss-key option
+             --gss-key    : GoogleSpreadSheet key
+             --user       : google account user     with --gss-key option
+             --password   : google account password with --gss-key option
 
-           --ddl-only   : output ddl only
-           --dml-only   : output dml only
+             --ddl-only   : output ddl only
+             --dml-only   : output dml only
 
-           --table      : filtering table name (default: all)
-           --drop-table : drop table if exists table_name
-           --dml-transaction : add START TRANSACTION; ... COMMIT;
+             --table      : filtering table name (default: all)
+             --drop-table : drop table if exists table_name
+             --dml-transaction : add START TRANSACTION; ... COMMIT;
 
 ## Example
 
