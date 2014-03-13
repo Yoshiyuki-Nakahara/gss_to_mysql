@@ -395,7 +395,8 @@ sub _make_sql_dml
 
     for my $row ( @{$rows} ) {
         my @cols_dml;
-        for my $column_name ( keys %{$row} ) {
+        my @column_names = keys %{$row};
+        for my $column_name ( @column_names ) {
             my $sql_tmp;
             for my $column_definition ( @{$table_definition->{column_definition}} ) {
                 if ( $column_definition->{column_name} eq $column_name ) {
@@ -410,6 +411,11 @@ sub _make_sql_dml
             }
             push @cols_dml, $sql_tmp;
         }
+        if ( ! first_index { $option->{'ctime-column'} } @column_names ) {
+            my $sql_tmp = $option->{'ctime-column'} . " = NOW()";
+            push @cols_dml, $sql_tmp;
+        }
+
         $sql .= "REPLACE INTO $table_name SET ";
         $sql .= join ", ", @cols_dml;
         $sql .= ";\n";
@@ -469,6 +475,8 @@ usage: perl $basename.pl options
            --table      : filtering table name (default: all)
            --drop-table : drop table if exists table_name
            --dml-transaction : add START TRANSACTION; ... COMMIT;
+
+           --ctime-column : if specified, auto generate now() dml
 END_USAGE
 }
 
@@ -545,6 +553,8 @@ sub parse_program_option
         'table=s',            # specify table name (default: all)
         'drop-table+',        # drop table if exists table_name
         'dml-transaction+',   # add START TRANSACTION; ... COMMIT;
+
+        'ctime-column=s',      # if specified, auto generate now() dml
     ) or die usage;
 
     verbose( "[ parsing get program option(s) ] ...", 2 );
