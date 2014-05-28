@@ -258,7 +258,9 @@ sub _gss_to_hash
         for my $dml_row ( @dml_rows ) {
             for my $dml_key ( keys %{$dml_row->content} ) {
                 my $header_dml_name = $dml_header->content->{$dml_key};
-                $dml_row->content->{$header_dml_name} = $dml_row->content->{$dml_key};
+                if ( $header_dml_name ) {
+                    $dml_row->content->{$header_dml_name} = $dml_row->content->{$dml_key};
+                }
                 delete $dml_row->content->{$dml_key};
             }
 
@@ -291,8 +293,11 @@ sub _make_sql_ddl
     }
     my $table_name = $hash->{table_name};
 
-    if ( defined $option->{table} && $option->{table} ne $table_name ) {
-        return "";
+    if ( defined $option->{'table'} ) {
+        my @option_table_names = split /,/, $option->{'table'};
+        if ( ( first_index { $_ eq $table_name } @option_table_names ) == -1 ) {
+            return "";
+        }
     }
 
     my $temporary = '';
@@ -377,8 +382,11 @@ sub _make_sql_dml
     verbose( "[ _make_sql_dml ]" );
     verbose( Dumper $rows );
 
-    if ( defined $option->{table} && $option->{table} ne $table_name ) {
-        return "";
+    if ( defined $option->{'table'} ) {
+        my @option_table_names = split /,/, $option->{'table'};
+        if ( (first_index { $_ eq $table_name } @option_table_names) == -1 ) {
+            return "";
+        }
     }
 
     my $sql = "-- [DML $table_name]\n";
@@ -472,7 +480,7 @@ usage: perl $basename.pl options
            --ddl-only   : output ddl only
            --dml-only   : output dml only
 
-           --table      : filtering table name (default: all)
+           --table      : filtering table name (csv, default: all)
            --drop-table : drop table if exists table_name
            --dml-transaction : add START TRANSACTION; ... COMMIT;
 
@@ -550,7 +558,7 @@ sub parse_program_option
         'ddl-only+',          # output ddl only
         'dml-only+',          # output dml only
 
-        'table=s',            # specify table name (default: all)
+        'table=s',            # specify table name (csv, default: all)
         'drop-table+',        # drop table if exists table_name
         'dml-transaction+',   # add START TRANSACTION; ... COMMIT;
 
