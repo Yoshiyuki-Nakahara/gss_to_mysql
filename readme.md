@@ -27,7 +27,7 @@ Generate DDL/DML for MySQL from GoogleSpreadSheet
 
     [Command]
     perl gss_to_mysql.pl \
-        --gss-key=0AkNwR6_Dui92dG14MG03cklKSEdOYV9hVldFdFBEN1E \
+        --gss-title=hogehoge \
         --user=<your google acount username> \
         --password=<your google account password>
 
