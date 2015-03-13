@@ -35,7 +35,7 @@ my %program;
         my $table_definition = _yaml_to_hash( $config, $option, $argv );
         $sql_ddl .= _make_sql_ddl( $config, $option, $table_definition );
     }
-    elsif ( $option->{'gss-key'} ) {
+    elsif ( $option->{'gss-title'} ) {
         my ( $ddl_definition, $dml_definition ) = _gss_to_hash( $config, $option, $argv );
         for my $table_name ( keys %{$ddl_definition} ) {
             $sql_ddl .= _make_sql_ddl( $config, $option, $ddl_definition->{$table_name} );
@@ -72,13 +72,14 @@ sub _gss_to_hash
 {
     my ( $config, $option, $argv ) = @_;
 
-    my $gss_key = $option->{'gss-key'};
+    my $gss_key = $option->{'gss-title'};
     # todo $0="hoge", gnome-keyring でパスワードが見えないように
     my $service = Net::Google::Spreadsheets->new(
         username => $option->{'user'},
         password => $option->{'password'},
     );
-    my $spreadsheet    = $service->spreadsheet( { key => $gss_key } );
+    #my $spreadsheet    = $service->spreadsheet( { key => $gss_key } );
+    my $spreadsheet    = $service->spreadsheet( { title => $gss_key } );
     unless ( $spreadsheet ) {
         die "Error: failed to get spreadsheet";
     }
@@ -473,9 +474,9 @@ usage: perl $basename.pl options
            -c|--config  : specify config file
 
            --yaml       : yaml filepath for table definition
-           --gss-key    : GoogleSpreadSheet key
-           --user       : google account user     with --gss-key option
-           --password   : google account password with --gss-key option
+           --gss-title  : GoogleSpreadSheet key
+           --user       : google account user     with --gss-title option
+           --password   : google account password with --gss-title option
 
            --ddl-only   : output ddl only
            --dml-only   : output dml only
@@ -551,9 +552,9 @@ sub parse_program_option
         'config=s',           # specify config file
 
         'yaml=s',             # yaml filepath for table definition
-        'gss-key=s',          # GoogleSpreadSheet key
-        'user=s',             # google account user     with --gss-key option
-        'password=s',         # google account password with --gss-key option
+        'gss-title=s',        # GoogleSpreadSheet key
+        'user=s',             # google account user     with --gss-title option
+        'password=s',         # google account password with --gss-title option
 
         'ddl-only+',          # output ddl only
         'dml-only+',          # output dml only
@@ -570,10 +571,10 @@ sub parse_program_option
 
     print usage() and exit if $option->{help};
 
-    unless ( $option->{'yaml'} || $option->{'gss-key'} ) {
-        die 'must be specified --yaml or --gss-key';
+    unless ( $option->{'yaml'} || $option->{'gss-title'} ) {
+        die 'must be specified --yaml or --gss-title';
     }
-    if ( defined $option->{'gss-key'} ) {
+    if ( defined $option->{'gss-title'} ) {
         unless ( defined $option->{'user'} && defined $option->{'password'} ) {
             die 'must be specified --user and --password';
         }
