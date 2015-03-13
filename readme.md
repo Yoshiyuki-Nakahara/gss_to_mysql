@@ -9,7 +9,7 @@ Generate DDL/DML for MySQL from GoogleSpreadSheet
     options: -h|--help    : print usage and exit
              -v|--verbose : print message verbosely
 
-             --gss-key    : GoogleSpreadSheet key
+             --gss-title  : GoogleSpreadSheet Title
              --user       : google account user     with --gss-key option
              --password   : google account password with --gss-key option
 
